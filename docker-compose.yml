@@ -1,0 +1,49 @@
+services:
+  mongo_db:
+    container_name: mern_stack_database
+    image: mongo:latest
+    restart: always
+    volumes:
+      - mongo_db:/data/db
+    networks:
+      - express-mongo
+
+  app_server:
+    container_name: mern_stack_server
+    image: erwinis001/mern_stack_project_ecommerce_hayroo_server:latest
+    build: 
+      context: server
+    ports:
+      - 8000:8000
+    environment:
+      DATABASE: mongodb://mongo_db/ecommerce
+      PORT: 8000
+      BRAINTREE_MERCHANT_ID: n74dc2kw9g3ws389
+      BRAINTREE_PUBLIC_KEY: bgytmgzhz5f6t2tg
+      BRAINTREE_PRIVATE_KEY: e6f226166da99d874f00008f0bba14fe
+    depends_on:
+      - mongo_db
+    networks:
+      - react-express
+      - express-mongo
+  
+  app_client:
+    container_name: mern_stack_client
+    image: erwinis001/mern_stack_project_ecommerce_hayroo_client:latest
+    build: 
+      context: client
+    ports:
+      - 3000:3000
+    environment:
+      REACT_APP_API_URL: http://localhost:8000
+    depends_on:
+      - app_server
+    networks:
+      - react-express
+
+volumes:
+  mongo_db: {}
+
+networks:
+  react-express:
+  express-mongo:
